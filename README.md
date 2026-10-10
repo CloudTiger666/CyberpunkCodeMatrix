@@ -1,20 +1,14 @@
-# 赛博朋克 2077 入侵协议 / Cyberpunk 2077 Breach Protocol
+# 赛博朋克 2077 入侵协议
+
+[English](README.en.md)
 
 本地小工具：把《赛博朋克 2077》入侵协议的截图贴进来，读出代码矩阵、目标序列和缓冲区长度，并标出一条上传路线。
 
-A local tool for the breach protocol minigame in *Cyberpunk 2077*. Paste a screenshot and it reads the code matrix, the target sequences, and the buffer length, then marks a route.
-
 程序只分析你自己打开或粘贴的图片。它不读取游戏内存，不自动点击，运行时也不联网。
-
-The program only analyzes an image you open or paste. It does not read game memory, click for you, or use the network while it runs.
 
 由 [Cyberpunk_CodeMatrix_decipher](https://github.com/zlmturnout/Cyberpunk_CodeMatrix_decipher) 迭代而来。原项目要手填矩阵再穷举路线。这一版直接读截图。路线规则仍来自原项目，许可协议沿用 MIT，见 `LICENSE`。
 
-This project continues [Cyberpunk_CodeMatrix_decipher](https://github.com/zlmturnout/Cyberpunk_CodeMatrix_decipher). The original tool asked you to type the matrix and then enumerated routes. This version reads the screenshot. The route rules still come from that project, and the MIT license in `LICENSE` is kept.
-
-## 中文
-
-### 它做什么
+## 它做什么
 
 入侵协议里有一块方形代码矩阵，右侧有一到三条要上传的序列，上方有一排缓冲区空格。你要从第一行选一格开始，之后在同一行和同一列之间交替点选，已经点过的格子不能再点。缓冲区走满，或者你主动结束时，路径里连续出现的序列会被上传。
 
@@ -27,7 +21,7 @@ This project continues [Cyberpunk_CodeMatrix_decipher](https://github.com/zlmtur
 
 游戏里的代码只有六种：`1C`、`55`、`7A`、`BD`、`E9`、`FF`。识别靠这六种黄色等宽字形，不靠中文 OCR。字形模板在 `templates.npz` 里。认错的格子会用红框标出，下拉框里可以直接改，改完会重新计算。
 
-### 怎样算一条好路线
+## 怎样算一条好路线
 
 同时满足这些规则：
 
@@ -37,7 +31,7 @@ This project continues [Cyberpunk_CodeMatrix_decipher](https://github.com/zlmtur
 
 序列按路径上的连续代码匹配，前后可以接在一起，也可以重叠。缓冲放不下全部序列时，结果里会分开写已上传和未上传。矩阵是方形、缓冲不超过十几格时可以搜完，结果是确定的。
 
-### 怎么用
+## 怎么用
 
 需要 Python 3，以及 `numpy`、`pillow`。界面用系统自带的 tkinter。
 
@@ -56,7 +50,7 @@ python -m pip install -r requirements.txt
 
 **窗口置顶** 让这个窗口留在游戏前面，再点一次取消。
 
-### 文件
+## 文件
 
 | 文件 | 作用 |
 | --- | --- |
@@ -66,58 +60,3 @@ python -m pip install -r requirements.txt
 | `templates.npz` | 六种代码的字形模板 |
 | `启动.bat` | Windows 下双击启动 |
 | `requirements.txt` | Python 依赖 |
-
-## English
-
-### What it does
-
-Breach protocol shows a square code matrix, one to three sequences to upload, and a row of buffer slots. You start on any cell in the first row. After that, picks alternate between the current row and the current column, and a cell cannot be used twice. A sequence uploads when its codes appear as a contiguous stretch of the path.
-
-This program:
-
-- Finds the code matrix. The size is not fixed, so 4×4 through 7×7 screenshots work.
-- Reads the target sequences to the right of the matrix. Each sequence is usually 2 to 4 codes.
-- Counts the buffer slots above the matrix. If the count is unclear, it uses 8 and asks you to check.
-- Finds a route, numbers the cells 1, 2, 3… on the screenshot, and lists the row and column of each step.
-
-The game uses only six codes: `1C`, `55`, `7A`, `BD`, `E9`, and `FF`. Recognition compares those yellow monospace glyphs. It does not OCR the Chinese labels. The glyph templates live in `templates.npz`. An uncertain cell gets a red frame. Change it in the dropdown and the route is calculated again.
-
-### How a route is chosen
-
-The search prefers, in order:
-
-1. More completed sequences.
-2. Longer sequences when the count is the same.
-3. A shorter path, so fewer later clicks can go wrong.
-
-A sequence matches any contiguous stretch of the path. Stretches may sit next to each other or overlap. If the buffer cannot hold every sequence, the result lists what was uploaded and what was not. A square matrix with a small buffer can be searched completely, so the result is determined by those rules.
-
-### How to run
-
-You need Python 3, plus `numpy` and `pillow`. The window uses tkinter from the Python install.
-
-```bat
-python -m pip install -r requirements.txt
-```
-
-pip needs the network once, while installing. After that, double-click `启动.bat` or run `python app.py` in this folder. Running the solver does not use the network.
-
-1. Copy the breach protocol screen with your screenshot tool, focus this window, and press Ctrl+V. **Open screenshot** also accepts a saved image.
-2. The view frames the code matrix. Scroll to zoom around the pointer, drag with the left button, and use **Full image** to see the whole screenshot.
-3. Check the matrix, sequences, and buffer size on the right. A red frame means that cell is uncertain.
-4. Click the listed rows and columns in order. If the buffer is not full, the listed steps are enough; the remaining cells can be anything.
-
-**English** on the toolbar switches the interface to English. **中文** switches it back. Step numbers and the codes themselves stay the same.
-
-**Keep on top** holds the window above the game. Click it again to turn that off.
-
-### Files
-
-| File | Role |
-| --- | --- |
-| `app.py` | Window: open or paste a screenshot, edit cells, draw the route, switch language |
-| `recognize.py` | Reads the matrix, sequences, buffer length, and a confidence for each cell |
-| `solver.py` | Searches for a route under the breach protocol rules |
-| `templates.npz` | Glyph templates for the six codes |
-| `启动.bat` | Double-click launcher on Windows |
-| `requirements.txt` | Python dependencies |
