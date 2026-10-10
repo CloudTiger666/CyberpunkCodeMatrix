@@ -1,7 +1,6 @@
 """从入侵协议截图读出代码矩阵、目标序列和缓冲区长度。"""
 
 import os
-import sys
 
 import numpy as np
 from PIL import Image
@@ -11,17 +10,8 @@ from solver import CODES
 # 字形比较用的固定尺寸，宽高比接近两个字母
 GLYPH_W = 32  # 模板宽度
 GLYPH_H = 18  # 模板高度
-
-
-def _app_dir():
-    """源码运行时用脚本所在目录，打包后用解压出来的资源目录。"""
-    if getattr(sys, "frozen", False):
-        return getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
-    return os.path.dirname(os.path.abspath(__file__))
-
-
-# 和程序放在一起的模板文件
-TEMPLATE_PATH = os.path.join(_app_dir(), "templates.npz")
+# 和 recognize.py 放在一起的模板文件
+TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates.npz")
 
 
 class CellRead:
