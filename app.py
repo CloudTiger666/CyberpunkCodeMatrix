@@ -15,6 +15,98 @@ TEXT = "#e4f2a8"  # 普通文字
 ACCENT = "#d6ff4a"  # 路线高亮
 WARN = "#ff5c4d"  # 识别不稳的格子
 
+# 界面文案。键相同，zh / en 各一份
+TEXT_STRINGS = {
+    "zh": {
+        "title": "赛博朋克 2077 入侵协议",
+        "open": "打开截图",
+        "paste": "粘贴截图  Ctrl+V",
+        "buffer": "缓冲格数",
+        "buffer_unsure": "缓冲格数（没数清，请核对）",
+        "recalc": "重新计算",
+        "pin": "窗口置顶",
+        "unpin": "取消置顶",
+        "full": "完整图",
+        "wheel": "滚轮缩放，按住拖动",
+        "edit_hint": "认错的格子直接改，红框表示这格不太稳",
+        "switch": "English",
+        "matrix": "代码矩阵",
+        "sequences": "目标序列",
+        "welcome": "打开一张入侵协议截图，或先截图再按 Ctrl+V。\n算出路线后会先对准矩阵，滚轮可以放大缩小，点「完整图」回到整张截图。",
+        "canvas_empty": "把入侵协议的截图贴到这里\n滚轮缩放，按住拖动",
+        "file_title": "选择入侵协议截图",
+        "images": "图片",
+        "all_files": "全部文件",
+        "cannot_open": "打不开",
+        "no_image_title": "没有图片",
+        "no_image": "剪贴板里没有截图。可以先用系统截图复制，再按 Ctrl+V。",
+        "no_matrix_title": "没有识别到矩阵",
+        "no_codes": "没有走出任何代码。",
+        "route": "路线：%s",
+        "steps": "步数：%d / 缓冲 %d",
+        "step": "%d. 第%d行 第%d列  %s",
+        "buffer_left": "缓冲区还没走满。这些步骤走完，该上传的就已经上传了，剩下的格子随便点。",
+        "uploaded": "已上传：%s",
+        "missed": "未上传：%s",
+        "none": "无",
+        "join": "、",
+    },
+    "en": {
+        "title": "Cyberpunk 2077 Breach Protocol",
+        "open": "Open screenshot",
+        "paste": "Paste screenshot  Ctrl+V",
+        "buffer": "Buffer size",
+        "buffer_unsure": "Buffer size (not counted, please check)",
+        "recalc": "Recalculate",
+        "pin": "Keep on top",
+        "unpin": "Stop keeping on top",
+        "full": "Full image",
+        "wheel": "Scroll to zoom, drag to move",
+        "edit_hint": "Correct a wrong cell directly. A red frame means it is uncertain",
+        "switch": "中文",
+        "matrix": "Code matrix",
+        "sequences": "Target sequences",
+        "welcome": "Open a breach protocol screenshot, or copy one and press Ctrl+V.\nAfter a route is found, the view frames the matrix. Scroll to zoom, and use Full image to see the whole screenshot.",
+        "canvas_empty": "Paste a breach protocol screenshot here\nScroll to zoom, drag to move",
+        "file_title": "Choose a breach protocol screenshot",
+        "images": "Images",
+        "all_files": "All files",
+        "cannot_open": "Cannot open",
+        "no_image_title": "No image",
+        "no_image": "The clipboard has no screenshot. Copy one with your screenshot tool, then press Ctrl+V.",
+        "no_matrix_title": "No matrix found",
+        "no_codes": "No codes were entered.",
+        "route": "Route: %s",
+        "steps": "Steps: %d / buffer %d",
+        "step": "%d. Row %d, column %d  %s",
+        "buffer_left": "The buffer is not full. After these steps, every sequence that can be uploaded is already uploaded. Click any remaining cells.",
+        "uploaded": "Uploaded: %s",
+        "missed": "Not uploaded: %s",
+        "none": "none",
+        "join": ", ",
+    },
+}
+
+# 求解和识别抛出的中文错误，切到英文时对照这张表
+ERROR_EN = {
+    "代码矩阵必须是方形": "The code matrix must be square.",
+    "缓冲区长度至少为 1": "The buffer must hold at least 1 code.",
+    "没有在截图里找到代码矩阵": "No code matrix was found in this screenshot.",
+    "缺少字形模板，请先用参考截图生成 templates.npz": "Glyph templates are missing. Generate templates.npz from a reference screenshot first.",
+}
+
+
+def translate_error(lang, message):
+    """把程序内部的中文错误换成当前语言。"""
+    if lang == "zh":
+        return message
+    if message in ERROR_EN:
+        return ERROR_EN[message]
+    prefix = "无法识别的代码："
+    if message.startswith(prefix):
+        return "Unrecognized code: %s" % message[len(prefix):]
+    return message
+
 
 def annotate(image, result, route):
     """在截图上画出步骤编号，返回一张新图。"""
@@ -44,19 +136,18 @@ def annotate(image, result, route):
     return canvas
 
 
-def describe_route(route, buffer_size):
-    """把路线写成可以直接照着点的文字。"""
+def describe_route(route, buffer_size, text):
+    """把路线写成可以直接照着点的文字。text 是当前语言的文案表。"""
     if not route["codes"]:
-        return "没有走出任何代码。"
-    lines = ["路线：" + " → ".join(route["codes"]), ""]
-    done = []  # 已经传上的序列原文在外面拼
-    lines.append("步数：%d / 缓冲 %d" % (len(route["codes"]), buffer_size))
+        return text["no_codes"]
+    lines = [text["route"] % " → ".join(route["codes"]), ""]
+    lines.append(text["steps"] % (len(route["codes"]), buffer_size))
     lines.append("")
     for step, ((row, col), code) in enumerate(zip(route["path"], route["codes"]), start=1):
-        lines.append("%d. 第%d行 第%d列  %s" % (step, row + 1, col + 1, code))
+        lines.append(text["step"] % (step, row + 1, col + 1, code))
     if len(route["codes"]) < buffer_size:
         lines.append("")
-        lines.append("缓冲区还没走满。这些步骤走完，该上传的就已经上传了，剩下的格子随便点。")
+        lines.append(text["buffer_left"])
     return "\n".join(lines)
 
 
@@ -65,7 +156,7 @@ class App:
 
     def __init__(self):
         self.root = tk.Tk()  # 主窗口
-        self.root.title("赛博朋克 2077 入侵协议")
+        self.root.title(TEXT_STRINGS["zh"]["title"])
         self.root.geometry("1480x920")
         self.root.configure(bg=BG)
         self.root.minsize(1100, 720)
@@ -78,8 +169,11 @@ class App:
         self.matrix_vars = []  # 矩阵里每个下拉框的变量
         self.matrix_frames = []  # 用来标红的外框
         self.sequence_vars = []  # 每条序列的下拉框
+        self.lang = "zh"  # 当前界面语言
+        self.pinned = False  # 窗口是否置顶
+        self.pending_error = None  # 最近一次中文错误，切语言时再翻译
         self.buffer_var = tk.StringVar(value="8")  # 缓冲区格数
-        self.buffer_hint = tk.StringVar(value="缓冲格数")  # 缓冲是否数清
+        self.buffer_hint = tk.StringVar(value=TEXT_STRINGS["zh"]["buffer"])  # 缓冲是否数清
         self.view_mode = "fit"  # fit 完整图，matrix 对准矩阵，free 用户缩放
         self.scale = 1.0  # 自由缩放时，一个截图像素占多少屏幕像素
         self.pan_x = 0.0  # 截图左上角在画布上的横坐标
@@ -94,19 +188,27 @@ class App:
         """摆好工具条、截图区和编辑区。"""
         bar = tk.Frame(self.root, bg=BG)
         bar.grid(row=0, column=0, columnspan=2, sticky="ew", padx=12, pady=(10, 0))
-        tk.Button(bar, text="打开截图", command=self.open_file).pack(side="left")
-        tk.Button(bar, text="粘贴截图  Ctrl+V", command=self.paste_image).pack(side="left", padx=8)
+        self.open_button = tk.Button(bar, text="", command=self.open_file)
+        self.open_button.pack(side="left")
+        self.paste_button = tk.Button(bar, text="", command=self.paste_image)
+        self.paste_button.pack(side="left", padx=8)
         tk.Label(bar, textvariable=self.buffer_hint, bg=BG, fg=TEXT).pack(side="left", padx=(16, 4))
         self.buffer_spin = tk.Spinbox(
             bar, from_=2, to=12, width=4, textvariable=self.buffer_var, command=self._on_edit
         )
         self.buffer_spin.pack(side="left")
-        tk.Button(bar, text="重新计算", command=self._on_edit).pack(side="left", padx=8)
-        self.pin_button = tk.Button(bar, text="窗口置顶", command=self._toggle_pin)  # 置顶开关
+        self.recalc_button = tk.Button(bar, text="", command=self._on_edit)
+        self.recalc_button.pack(side="left", padx=8)
+        self.pin_button = tk.Button(bar, text="", command=self._toggle_pin)  # 置顶开关
         self.pin_button.pack(side="left", padx=4)
-        tk.Button(bar, text="完整图", command=self._show_full).pack(side="left", padx=4)
-        tk.Label(bar, text="滚轮缩放，按住拖动", bg=BG, fg="#8d9870").pack(side="left", padx=8)
-        tk.Label(bar, text="认错的格子直接改，红框表示这格不太稳", bg=BG, fg="#8d9870").pack(side="right")
+        self.full_button = tk.Button(bar, text="", command=self._show_full)
+        self.full_button.pack(side="left", padx=4)
+        self.lang_button = tk.Button(bar, text="", command=self._toggle_language)  # 中英切换
+        self.lang_button.pack(side="left", padx=4)
+        self.wheel_label = tk.Label(bar, text="", bg=BG, fg="#8d9870")
+        self.wheel_label.pack(side="left", padx=8)
+        self.edit_label = tk.Label(bar, text="", bg=BG, fg="#8d9870")
+        self.edit_label.pack(side="right")
 
         self.canvas = tk.Canvas(self.root, bg="#050705", highlightthickness=0)  # 左侧截图
         self.canvas.grid(row=1, column=0, sticky="nsew", padx=(12, 6), pady=12)
@@ -119,10 +221,12 @@ class App:
         side.grid(row=1, column=1, sticky="nsew", padx=(6, 12), pady=12)
         side.grid_rowconfigure(2, weight=1)
         side.grid_columnconfigure(0, weight=1)
-        tk.Label(side, text="代码矩阵", bg=PANEL, fg=ACCENT).grid(row=0, column=0, sticky="w", padx=8, pady=(8, 0))
+        self.matrix_label = tk.Label(side, text="", bg=PANEL, fg=ACCENT)
+        self.matrix_label.grid(row=0, column=0, sticky="w", padx=8, pady=(8, 0))
         self.matrix_host = tk.Frame(side, bg=PANEL)
         self.matrix_host.grid(row=1, column=0, sticky="ew", padx=8, pady=4)
-        tk.Label(side, text="目标序列", bg=PANEL, fg=ACCENT).grid(row=2, column=0, sticky="nw", padx=8)
+        self.sequence_label = tk.Label(side, text="", bg=PANEL, fg=ACCENT)
+        self.sequence_label.grid(row=2, column=0, sticky="nw", padx=8)
         self.sequence_host = tk.Frame(side, bg=PANEL)
         self.sequence_host.grid(row=3, column=0, sticky="ew", padx=8, pady=4)
         self.route_text = tk.Text(
@@ -131,18 +235,56 @@ class App:
         )
         self.route_text.grid(row=4, column=0, sticky="nsew", padx=8, pady=(4, 8))
         side.grid_rowconfigure(4, weight=1)
-        self._set_route_text("打开一张入侵协议截图，或先截图再按 Ctrl+V。\n算出路线后会先对准矩阵，滚轮可以放大缩小，点「完整图」回到整张截图。")
+        self._refresh_chrome()
+        self._set_route_text(self._text("welcome"))
 
         self.root.grid_columnconfigure(0, weight=5)
         self.root.grid_columnconfigure(1, weight=2)
         self.root.grid_rowconfigure(1, weight=1)
 
+    def _text(self, key):
+        """取出当前语言的一句界面文案。"""
+        return TEXT_STRINGS[self.lang][key]
+
+    def _toggle_language(self):
+        """在中文和英文界面之间切换，并重写已经显示的路线。"""
+        self.lang = "en" if self.lang == "zh" else "zh"
+        self._refresh_chrome()
+        if self.result is not None:
+            self._frame_next = False
+            self._solve_current()
+        elif self.pending_error:
+            self._set_route_text(translate_error(self.lang, self.pending_error))
+        else:
+            self._set_route_text(self._text("welcome"))
+        self._draw()
+
+    def _refresh_chrome(self):
+        """按当前语言刷新标题、按钮和固定标签。"""
+        self.root.title(self._text("title"))
+        self.open_button.configure(text=self._text("open"))
+        self.paste_button.configure(text=self._text("paste"))
+        self.recalc_button.configure(text=self._text("recalc"))
+        self.pin_button.configure(text=self._text("unpin") if self.pinned else self._text("pin"))
+        self.full_button.configure(text=self._text("full"))
+        self.lang_button.configure(text=self._text("switch"))
+        self.wheel_label.configure(text=self._text("wheel"))
+        self.edit_label.configure(text=self._text("edit_hint"))
+        self.matrix_label.configure(text=self._text("matrix"))
+        self.sequence_label.configure(text=self._text("sequences"))
+        if self.result is None:
+            self.buffer_hint.set(self._text("buffer"))
+        elif self.result.buffer_ok:
+            self.buffer_hint.set(self._text("buffer"))
+        else:
+            self.buffer_hint.set(self._text("buffer_unsure"))
+
     def _toggle_pin(self):
         """让窗口保持在游戏画面前面，再按一次就取消。"""
-        pinned = not bool(self.root.attributes("-topmost"))  # 当前是否已经置顶
-        self.root.attributes("-topmost", pinned)
-        self.pin_button.configure(text="取消置顶" if pinned else "窗口置顶")
-        if pinned:
+        self.pinned = not self.pinned
+        self.root.attributes("-topmost", self.pinned)
+        self.pin_button.configure(text=self._text("unpin") if self.pinned else self._text("pin"))
+        if self.pinned:
             self.root.lift()
 
     def _matrix_bounds(self):
@@ -261,15 +403,15 @@ class App:
     def open_file(self):
         """从文件打开截图。"""
         path = filedialog.askopenfilename(
-            title="选择入侵协议截图",
-            filetypes=[("图片", "*.png *.jpg *.jpeg *.bmp *.webp"), ("全部文件", "*.*")],
+            title=self._text("file_title"),
+            filetypes=[(self._text("images"), "*.png *.jpg *.jpeg *.bmp *.webp"), (self._text("all_files"), "*.*")],
         )
         if not path:
             return
         try:
             image = Image.open(path)
         except OSError as exc:
-            messagebox.showerror("打不开", str(exc))
+            messagebox.showerror(self._text("cannot_open"), str(exc))
             return
         self.load_image(image)
 
@@ -283,24 +425,26 @@ class App:
             try:
                 self.load_image(Image.open(data[0]))
             except OSError as exc:
-                messagebox.showerror("打不开", str(exc))
+                messagebox.showerror(self._text("cannot_open"), str(exc))
             return
-        messagebox.showinfo("没有图片", "剪贴板里没有截图。可以先用系统截图复制，再按 Ctrl+V。")
+        messagebox.showinfo(self._text("no_image_title"), self._text("no_image"))
 
     def load_image(self, image):
         """识别这张截图并算出路线。"""
         self.image = image.convert("RGB")
         self.view_mode = "fit"
         self._frame_next = True
+        self.pending_error = None
         try:
             self.result = recognize(self.image)
         except ValueError as exc:
             self.result = None
             self.route = None
             self._frame_next = False
-            self._set_route_text(str(exc))
+            self.pending_error = str(exc)
+            self._set_route_text(translate_error(self.lang, self.pending_error))
             self._draw()
-            messagebox.showerror("没有识别到矩阵", str(exc))
+            messagebox.showerror(self._text("no_matrix_title"), translate_error(self.lang, self.pending_error))
             return
         self._fill_editors()
         self._solve_current()
@@ -351,9 +495,9 @@ class App:
             self.sequence_vars.append(row_vars)
         self.buffer_var.set(str(self.result.buffer_size))
         if self.result.buffer_ok:
-            self.buffer_hint.set("缓冲格数")
+            self.buffer_hint.set(self._text("buffer"))
         else:
-            self.buffer_hint.set("缓冲格数（没数清，请核对）")
+            self.buffer_hint.set(self._text("buffer_unsure"))
         self.loading = False
 
     def _mark_edited(self, frame):
@@ -385,9 +529,11 @@ class App:
             self.route = solve(matrix, sequences, buffer_size)
         except ValueError as exc:
             self.route = None
-            self._set_route_text(str(exc))
+            self.pending_error = str(exc)
+            self._set_route_text(translate_error(self.lang, self.pending_error))
             self._draw()
             return
+        self.pending_error = None
         names = []  # 完成了哪些序列
         missed = []  # 没完成的序列
         for index, sequence in enumerate(sequences):
@@ -396,9 +542,10 @@ class App:
                 names.append(text)
             else:
                 missed.append(text)
-        body = describe_route(self.route, buffer_size)
-        extra = ["", "已上传：" + ("、".join(names) if names else "无")]
-        extra.append("未上传：" + ("、".join(missed) if missed else "无"))
+        words = self._text
+        body = describe_route(self.route, buffer_size, TEXT_STRINGS[self.lang])
+        extra = ["", words("uploaded") % (words("join").join(names) if names else words("none"))]
+        extra.append(words("missed") % (words("join").join(missed) if missed else words("none")))
         self._set_route_text(body + "\n" + "\n".join(extra))
         if self._frame_next and self.route["path"]:
             self.view_mode = "matrix"
@@ -418,7 +565,7 @@ class App:
         if self.image is None:
             self.canvas.create_text(
                 20, 20, anchor="nw", fill="#8d9870",
-                text="把入侵协议的截图贴到这里\n滚轮缩放，按住拖动", font=("Microsoft YaHei UI", 14),
+                text=self._text("canvas_empty"), font=("Microsoft YaHei UI", 14),
             )
             return
         width = self.canvas.winfo_width()  # 画布宽
