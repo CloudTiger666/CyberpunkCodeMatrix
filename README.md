@@ -4,16 +4,12 @@
 
 ## 使用
 
-双击 `启动.bat`，或在这个目录执行：
-
-```bat
-python app.py
-```
-
-打开截图，或先复制截图再按 Ctrl+V。左侧会标出 1、2、3…，右侧可以改认错的格子和缓冲格数。
-
-依赖：Python 3、`numpy`、`pillow`。
+拉取源码后，在这个目录安装依赖，再双击 `启动.bat`：
 
 ```bat
 python -m pip install -r requirements.txt
 ```
+
+也可以执行 `python app.py`。打开截图，或先复制截图再按 Ctrl+V。左侧会标出 1、2、3…，右侧可以改认错的格子和缓冲格数。
+
+依赖：Python 3、`numpy`、`pillow`。
