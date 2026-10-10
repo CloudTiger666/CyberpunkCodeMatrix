@@ -3,3 +3,7 @@ __pycache__/
 .idea/
 _preview.png
 _zoom.png
+build/
+dist/
+*.spec
+.venv-build/
