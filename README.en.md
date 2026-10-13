@@ -8,6 +8,8 @@ The program only analyzes an image you open or paste. It does not read game memo
 
 This project continues [Cyberpunk_CodeMatrix_decipher](https://github.com/zlmturnout/Cyberpunk_CodeMatrix_decipher). The original tool asked you to type the matrix and then enumerated routes. This version reads the screenshot. The route rules still come from that project, and the MIT license in `LICENSE` is kept.
 
+![The window after a route is found: the game screenshot on the left, the matrix and click steps on the right](docs/screenshot-en.png)
+
 ## What it does
 
 Breach protocol shows a square code matrix, one to three sequences to upload, and a row of buffer slots. You start on any cell in the first row. After that, picks alternate between the current row and the current column, and a cell cannot be used twice. A sequence uploads when its codes appear as a contiguous stretch of the path.

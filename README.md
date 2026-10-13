@@ -8,6 +8,8 @@
 
 由 [Cyberpunk_CodeMatrix_decipher](https://github.com/zlmturnout/Cyberpunk_CodeMatrix_decipher) 迭代而来。原项目要手填矩阵再穷举路线。这一版直接读截图。路线规则仍来自原项目，许可协议沿用 MIT，见 `LICENSE`。
 
+![算出路线后的窗口：左侧是游戏截图，右侧是矩阵和点击步骤](docs/screenshot-zh.png)
+
 ## 它做什么
 
 入侵协议里有一块方形代码矩阵，右侧有一到三条要上传的序列，上方有一排缓冲区空格。你要从第一行选一格开始，之后在同一行和同一列之间交替点选，已经点过的格子不能再点。缓冲区走满，或者你主动结束时，路径里连续出现的序列会被上传。
