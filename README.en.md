@@ -35,13 +35,15 @@ A sequence matches any contiguous stretch of the path. Stretches may sit next to
 
 ## How to run
 
-You need Python 3, plus `numpy` and `pillow`. The window uses tkinter from the Python install.
+On Windows, use the release build. Download `BreachProtocol.exe` from [Releases](https://github.com/CloudTiger666/CyberpunkCodeMatrix/releases) and double-click it. Python is not required. The first launch takes a moment. Some antivirus tools flag this kind of single-file program; allow it if you trust the download.
+
+Running from source needs Python 3, plus `numpy` and `pillow`. The window uses tkinter from the Python install.
 
 ```bat
 python -m pip install -r requirements.txt
 ```
 
-pip needs the network once, while installing. After that, double-click `启动.bat` or run `python app.py` in this folder. Running the solver does not use the network.
+pip needs the network once, while installing. After that, double-click `启动.bat` or run `python app.py` in this folder. Running the solver does not use the network. After changing the code, double-click `打包.bat` to rebuild `dist\BreachProtocol.exe`. That step installs PyInstaller and needs the network.
 
 1. Copy the breach protocol screen with your screenshot tool, focus this window, and press Ctrl+V. **Open screenshot** also accepts a saved image.
 2. The view frames the code matrix. Scroll to zoom around the pointer, drag with the left button, and use **Full image** to see the whole screenshot.
@@ -60,5 +62,6 @@ pip needs the network once, while installing. After that, double-click `启动.b
 | `recognize.py` | Reads the matrix, sequences, buffer length, and a confidence for each cell |
 | `solver.py` | Searches for a route under the breach protocol rules |
 | `templates.npz` | Glyph templates for the six codes |
-| `启动.bat` | Double-click launcher on Windows |
+| `启动.bat` | Double-click launcher for the source tree on Windows |
+| `打包.bat` | Rebuilds the Windows release as `dist\BreachProtocol.exe` |
 | `requirements.txt` | Python dependencies |

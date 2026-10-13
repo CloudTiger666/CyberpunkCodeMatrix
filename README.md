@@ -35,13 +35,15 @@
 
 ## 怎么用
 
-需要 Python 3，以及 `numpy`、`pillow`。界面用系统自带的 tkinter。
+Windows 上可以直接用发行版。到 [Releases](https://github.com/CloudTiger666/CyberpunkCodeMatrix/releases) 下载 `BreachProtocol.exe`，双击打开。不需要安装 Python。第一次打开会稍等一两秒。个别杀毒软件会误报这类单文件程序，放行即可。
+
+从源码运行需要 Python 3，以及 `numpy`、`pillow`。界面用系统自带的 tkinter。
 
 ```bat
 python -m pip install -r requirements.txt
 ```
 
-安装依赖时 pip 会联网下载一次。装好之后，双击 `启动.bat`，或在这个目录执行 `python app.py`，运行过程本身不需要网络。
+安装依赖时 pip 会联网下载一次。装好之后，双击 `启动.bat`，或在这个目录执行 `python app.py`。运行过程本身不需要网络。改完代码后，双击 `打包.bat` 可以重新生成 `dist\BreachProtocol.exe`。打包时会联网安装 PyInstaller。
 
 1. 用系统截图或截图软件复制入侵协议画面，回到窗口按 Ctrl+V。也可以点「打开截图」选一张已保存的图片。
 2. 左侧会先对准代码矩阵。滚轮以鼠标位置放大缩小，按住左键拖动，点「完整图」回到整张截图。
@@ -60,5 +62,6 @@ python -m pip install -r requirements.txt
 | `recognize.py` | 从截图读出矩阵、序列、缓冲格数和每格置信度 |
 | `solver.py` | 按入侵协议规则搜索路线 |
 | `templates.npz` | 六种代码的字形模板 |
-| `启动.bat` | Windows 下双击启动 |
+| `启动.bat` | Windows 下从源码双击启动 |
+| `打包.bat` | 重新打出 Windows 发行版 `dist\BreachProtocol.exe` |
 | `requirements.txt` | Python 依赖 |
